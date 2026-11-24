@@ -12,17 +12,13 @@ let vehicules = [
 // liste les véhicules ; avec ?disponible=true
 route.get("/", (req,res) => {
     const {disponible} = req.query;
-
     let results = [...vehicules];
 
-    if(disponible){
-        if(typeof disponible !== "boolean"){
-            return res.status(400).json({Erreur: "disponible doit etre boolean"})
+    if(disponible !== undefined){
+        const estDisponible = disponible === "true"
+        results = vehicules.filter((v) => v.disponible === estDisponible);
     }
-
-    results = results.find((vehicule) => vehicule.disponible === disponible)
-    }
-
+    
     res.json(results)
 });
 
@@ -103,18 +99,16 @@ route.patch("/:id", (req,res) => {
     return res.status(400).json({Erreur: "La immatriculation est obligatoire et doit etre de type string"})
     }
 
-    
-
     if(typeof disponible !== "boolean"){
         return res.status(400).json({Erreur: "Le status est obligatoire et doit etre de type boolean"})
     }
 
     const vehicule = vehicules.find((v) => v.id === vehiculeId)
 
-    vehicule.marque = marque;
-    vehicule.modele = modele;
-    vehicule.immatriculation = immatriculation;
-    vehicule.disponible = disponible;
+    if(marque !==undefined){vehicule.marque = marque}
+    if(modele !==undefined){vehicule.modele = modele}
+    if(immatriculation !== undefined){vehicule.immatriculation = immatriculation} 
+    if(disponible !== undefined) {vehicule.disponible = disponible} 
 
     res.status(201).json({message: "Vehicule modifié avec success"}, vehicule);
 });
