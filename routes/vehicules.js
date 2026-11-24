@@ -76,41 +76,61 @@ route.post("/", (req,res) => {
 
 
 //modifie un ou plusieurs champs:
-route.patch("/:id", (req,res) => {
-    const {id} = req.params;
-    const vehiculeId = Number(id);
+route.patch("/:id", (req, res) => {
+  const vehiculeId = Number(req.params.id);
 
-    if(!vehiculeId){
-        return res.status(404).json({Erreur: "Vehicule non disponible"})
+  if (!Number.isInteger(vehiculeId) || vehiculeId <= 0) {
+    return res.status(400).json({ error: "Identifiant de véhicule invalide" });
+  }
+
+  const vehicule = vehicules.find((v) => v.id === vehiculeId);
+  if (!vehicule) {
+    return res.status(404).json({ error: "Véhicule non trouvé" });
+  }
+
+  const { marque, modele, immatriculation, disponible } = req.body;
+
+  if (
+    marque === undefined &&
+    modele === undefined &&
+    immatriculation === undefined &&
+    disponible === undefined
+  ) {
+    return res.status(400).json({ error: "Au moins un champ doit être fourni" });
+  }
+
+  if (marque !== undefined) {
+    if (typeof marque !== "string" || marque.trim() === "") {
+      return res.status(400).json({ error: "La marque doit être une chaîne non vide" });
     }
+    vehicule.marque = marque.trim();
+  }
 
-    const {marque, modele, immatriculation, disponible} = req.body;
-
-    //Validation du corps:
-    if(typeof marque !== "string" || marque.trim() === ""){
-        return res.status(400).json({Erreur: "La marque est obligatoire et doit etre de type string"})
+  if (modele !== undefined) {
+    if (typeof modele !== "string" || modele.trim() === "") {
+      return res.status(400).json({ error: "Le modèle doit être une chaîne non vide" });
     }
+    vehicule.modele = modele.trim();
+  }
 
-    if(typeof modele !== "string" || modele.trim() === ""){
-    return res.status(400).json({Erreur: "La modele est obligatoire et doit etre de type string"})
+  if (immatriculation !== undefined) {
+    if (typeof immatriculation !== "string" || immatriculation.trim() === "") {
+      return res.status(400).json({ error: "L'immatriculation doit être une chaîne non vide" });
     }
+    vehicule.immatriculation = immatriculation.trim();
+  }
 
-    if(typeof immatriculation !== "string" || immatriculation.trim() === ""){
-    return res.status(400).json({Erreur: "La immatriculation est obligatoire et doit etre de type string"})
+  if (disponible !== undefined) {
+    if (typeof disponible !== "boolean") {
+      return res.status(400).json({ error: "La disponibilité doit être un booléen" });
     }
+    vehicule.disponible = disponible;
+  }
 
-    if(typeof disponible !== "boolean"){
-        return res.status(400).json({Erreur: "Le status est obligatoire et doit etre de type boolean"})
-    }
-
-    const vehicule = vehicules.find((v) => v.id === vehiculeId)
-
-    if(marque !==undefined){vehicule.marque = marque}
-    if(modele !==undefined){vehicule.modele = modele}
-    if(immatriculation !== undefined){vehicule.immatriculation = immatriculation} 
-    if(disponible !== undefined) {vehicule.disponible = disponible} 
-
-    res.status(201).json({message: "Vehicule modifié avec success"}, vehicule);
+  return res.status(200).json({
+    message: "Véhicule modifié avec succès",
+    vehicule
+  });
 });
 
 
@@ -121,14 +141,11 @@ route.delete("/:id",(req,res) => {
     if(!vehiculeId){
         return res.status(404).json({Erreur: "Vehicule non disponible"})
     }
-    
 
     vehicules = vehicules.filter((v) => v.id !== vehiculeId);
 
     res.json(204).end()
 })
-
-
 
 
 export default route
