@@ -1,25 +1,19 @@
 import express from "express";
 import "dotenv/config"
 
-
 import vehiculesRoutes from "./routes/vehicules.js"
+import journalisation from "./middlewares/journalisation.js";
 
 const PORT = process.env.port
 
-/***Init exoress Server */
+/***Init express Server */
 const app = express();
 
 /*Mount middlewares*/
 app.use(express.json());
 
 // app.use(jouralisation);
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.originalUrl}`);
-  next();
-});
-
-
-
+app.use(journalisation)
 
 /* vehicules Endpoints*/
 app.use("/vehicules", vehiculesRoutes);
@@ -27,7 +21,7 @@ app.use("/vehicules", vehiculesRoutes);
 
 /*BAD ROUTE*/
 app.use((req, res) => {
-  res.status(404).json({ erreur: "Route inconnue" });
+  res.status(404).json({ error: "Route inconnue" });
 });
 
 /******/
